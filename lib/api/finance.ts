@@ -187,4 +187,30 @@ export const financeApi = {
     const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/cards/${cardId}`);
     return res.data;
   },
+
+  addGalleryItem: async (data: { file: File; label?: string; alt?: string; order?: number }) => {
+    const formData = new FormData();
+    formData.append('file', data.file);
+    if (data.label !== undefined) formData.append('label', data.label);
+    if (data.alt !== undefined) formData.append('alt', data.alt);
+    // No enviamos 'order' porque FormData lo envía como string y el backend espera un entero
+    // if (data.order !== undefined) formData.append('order', String(data.order));
+
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/gallery`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+
+  updateGalleryItem: async (itemId: string, data: { label?: string; order?: number }) => {
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/gallery/${itemId}`, data);
+    return res.data;
+  },
+
+  removeGalleryItem: async (itemId: string) => {
+    const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/gallery/${itemId}`);
+    return res.data;
+  },
 };

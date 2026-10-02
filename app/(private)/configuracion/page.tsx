@@ -15,9 +15,10 @@ import { BusinessInfoSheet } from '@/components/configuracion/BusinessInfoSheet'
 import { BankAccountsSheet } from '@/components/configuracion/BankAccountsSheet'
 import { TermsSheet } from '@/components/configuracion/TermsSheet'
 import { PublicPageSheet } from '@/components/configuracion/PublicPageSheet'
+import { GallerySheet } from '@/components/configuracion/GallerySheet'
 import { Button } from '@/components/ui/button'
 
-type SectionKey = 'business' | 'accounts' | 'terms' | 'page'
+type SectionKey = 'business' | 'accounts' | 'terms' | 'page' | 'gallery'
 
 interface Section {
   key: SectionKey
@@ -61,6 +62,13 @@ function buildSections(config: BusinessConfig, accounts: PaymentCard[]): Section
       key: 'page',
       title: 'Tu página',
       summary: `${plural(services.length, 'servicio', 'servicios')} · ${plural(zones.length, 'zona', 'zonas')}`,
+    },
+    {
+      key: 'gallery',
+      title: 'Catálogo de imágenes',
+      summary: config.gallery?.length
+        ? `${plural(config.gallery.length, 'imagen', 'imágenes')}`
+        : 'Sube fotos de tus productos',
     },
   ]
 }
@@ -115,6 +123,7 @@ export default function ConfigurationPage() {
           <BankAccountsSheet open={openSection === 'accounts'} onOpenChange={close} accounts={accounts} />
           <TermsSheet open={openSection === 'terms'} onOpenChange={close} />
           <PublicPageSheet open={openSection === 'page'} onOpenChange={close} />
+          <GallerySheet open={openSection === 'gallery'} onOpenChange={close} />
         </>
       )}
     </div>

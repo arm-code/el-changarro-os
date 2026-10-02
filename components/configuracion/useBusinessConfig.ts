@@ -53,5 +53,28 @@ export function useBusinessConfig() {
         onError: (err: unknown) => console.error('[useBusinessConfig] updateConfig', err),
     })
 
-    return { ...query, config: query.data as BusinessConfig | undefined, save, queryClient }
+    const addGallery = useMutation({
+        mutationFn: financeApi.addGalleryItem,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    const updateGallery = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: { label?: string; order?: number } }) => financeApi.updateGalleryItem(id, data),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    const removeGallery = useMutation({
+        mutationFn: financeApi.removeGalleryItem,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    return { 
+        ...query, 
+        config: query.data as BusinessConfig | undefined, 
+        save, 
+        addGallery, 
+        updateGallery, 
+        removeGallery, 
+        queryClient 
+    }
 }
