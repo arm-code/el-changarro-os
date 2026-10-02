@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { ChevronLeft, Copy, Loader2, Trash2 } from 'lucide-react'
+import { ChevronLeft, Copy, Loader2, Trash2, Edit2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { financeApi } from '@/lib/api/finance'
 import { bankFromClabe, digitsOnly, formatInGroups, isValidCardNumber, isValidClabe } from '@/lib/bank'
@@ -51,8 +51,9 @@ interface BankAccountsSheetProps {
 
 export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccountsSheetProps) {
     const queryClient = useQueryClient()
-    const [mode, setMode] = useState<'list' | 'add'>('list')
+    const [mode, setMode] = useState<'list' | 'add' | 'edit'>('list')
     const [toDelete, setToDelete] = useState<PaymentCard | null>(null)
+    const [editingAccount, setEditingAccount] = useState<PaymentCard | null>(null)
     const autofilledBank = useRef('')
 
     const {
@@ -100,6 +101,20 @@ export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccounts
         },
     })
 
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<CreatePaymentCardDto> }) => financeApi.updatePaymentCard(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['businessConfig'] })
+            toast.success('Cuenta actualizada')
+            setMode('list')
+            setEditingAccount(null)
+        },
+        onError: (err: unknown) => {
+            console.error('[BankAccountsSheet] updatePaymentCard', err)
+            toast.error('No se pudo actualizar la cuenta', { description: 'Revisa tu conexión e intenta de nuevo.' })
+        },
+    })
+
     const deleteMutation = useMutation({
         mutationFn: (id: string) => financeApi.deletePaymentCard(id),
         onSuccess: () => {
@@ -113,14 +128,31 @@ export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccounts
         },
     })
 
-    const onSubmit = handleSubmit((v) =>
-        addMutation.mutate({
+    const handleEdit = (account: PaymentCard) => {
+        setEditingAccount(account)
+        reset({
+            clabe: account.clabe || '',
+            cardNumber: account.cardNumber || '',
+            bank: account.bank || '',
+            beneficiary: account.beneficiary || '',
+        })
+        autofilledBank.current = account.bank || ''
+        setMode('edit')
+    }
+
+    const onSubmit = handleSubmit((v) => {
+        const payload = {
             bank: v.bank.trim(),
             beneficiary: v.beneficiary.trim(),
             clabe: digitsOnly(v.clabe),
             cardNumber: digitsOnly(v.cardNumber),
-        })
-    )
+        }
+        if (mode === 'edit' && editingAccount?.id) {
+            updateMutation.mutate({ id: editingAccount.id, data: payload })
+        } else {
+            addMutation.mutate(payload)
+        }
+    })
 
     const copy = async (digits: string, what: string) => {
         try {
@@ -131,19 +163,20 @@ export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccounts
         }
     }
 
-    const isAdd = mode === 'add'
+    const isForm = mode === 'add' || mode === 'edit'
+    const isPending = addMutation.isPending || updateMutation.isPending
 
     return (
         <>
             <AppBottomSheet
                 open={open}
                 onOpenChange={onOpenChange}
-                title={isAdd ? 'Agregar cuenta' : 'Cuentas para recibir pagos'}
-                description={isAdd ? undefined : 'Aparecen en tus notas y contratos para que te depositen.'}
+                title={mode === 'add' ? 'Agregar cuenta' : mode === 'edit' ? 'Editar cuenta' : 'Cuentas para recibir pagos'}
+                description={isForm ? undefined : 'Aparecen en tus notas y contratos para que te depositen.'}
                 footer={
-                    isAdd ? (
-                        <Button type="submit" form={FORM_ID} className={cn(TOUCH, 'w-full')} disabled={addMutation.isPending}>
-                            {addMutation.isPending ? (
+                    isForm ? (
+                        <Button type="submit" form={FORM_ID} className={cn(TOUCH, 'w-full')} disabled={isPending}>
+                            {isPending ? (
                                 <>
                                     <Loader2 className="animate-spin" aria-hidden />
                                     Guardando…
@@ -159,7 +192,7 @@ export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccounts
                     )
                 }
             >
-                {isAdd ? (
+                {isForm ? (
                     <div className="space-y-6">
                         <Button variant="ghost" className="-ml-3 h-11 rounded-xl px-3 text-[15px] text-muted-foreground" onClick={() => setMode('list')}>
                             <ChevronLeft aria-hidden />
@@ -227,6 +260,15 @@ export function BankAccountsSheet({ open, onOpenChange, accounts }: BankAccounts
                                                 <Copy className="size-5" aria-hidden />
                                             </Button>
                                         )}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="size-11 shrink-0 rounded-full text-muted-foreground hover:bg-blue-50 hover:text-blue-600"
+                                            onClick={() => handleEdit(account)}
+                                            aria-label={`Editar cuenta de ${account.bank}`}
+                                        >
+                                            <Edit2 className="size-5" aria-hidden />
+                                        </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"

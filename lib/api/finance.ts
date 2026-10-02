@@ -183,6 +183,17 @@ export const financeApi = {
     return res.data;
   },
 
+  updatePaymentCard: async (cardId: string, data: Partial<CreatePaymentCardDto>) => {
+    const payload: Record<string, any> = {};
+    if (data.bank !== undefined) payload.bank = data.bank.trim();
+    if (data.beneficiary !== undefined) payload.beneficiary = data.beneficiary.trim();
+    if (data.cardNumber !== undefined) payload.cardNumber = data.cardNumber.trim();
+    if (data.clabe !== undefined) payload.clabe = data.clabe.trim();
+
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/cards/${cardId}`, payload);
+    return res.data;
+  },
+
   deletePaymentCard: async (cardId: string) => {
     const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/cards/${cardId}`);
     return res.data;
