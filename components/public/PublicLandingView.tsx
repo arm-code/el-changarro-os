@@ -3,30 +3,44 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  Phone, Mail, MapPin, Clock, Shield, Users, Truck, CheckCircle,
-  ChevronDown, CreditCard
-} from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { businessApi } from '@/lib/api/business';
 import ProductCarousel from '@/components/products/ProductCarousel';
 import ShareButtons from '@/components/ShareButtons';
 import { cn } from '@/lib/utils';
 import { defaultBusinessConfig } from '@/lib/config';
+import type { BusinessConfig } from '@/types/finance';
 
-// ─── FaqItem helper ──────────────────────────────────────────────────────────
+// ─── Componentes estáticos auxiliares ─────────────────────────────────────────
+
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <details className="group border border-violet-200 rounded-xl bg-white overflow-hidden">
       <summary className="flex items-center justify-between gap-4 p-4 cursor-pointer list-none hover:bg-violet-50/50 active:bg-violet-100/50 transition-colors">
         <span className="font-semibold text-violet-900 text-sm">{question}</span>
-        <ChevronDown className="w-4 h-4 text-violet-500 shrink-0 transition-transform group-open:rotate-180" />
+        <Icons.ChevronDown className="w-4 h-4 text-violet-500 shrink-0 transition-transform group-open:rotate-180" />
       </summary>
       <div className="px-4 pb-4 text-violet-600 text-sm border-t border-violet-100 pt-3">
         {answer}
       </div>
     </details>
   );
+}
+
+function ValueIcon({ name }: { name: string | null }) {
+  if (!name) return <Icons.Star className="w-7 h-7" />;
+  const iconName = name.charAt(0).toUpperCase() + name.slice(1);
+  const Icon = (Icons as Record<string, any>)[iconName];
+  return Icon ? <Icon className="w-7 h-7" /> : <Icons.Star className="w-7 h-7" />;
+}
+
+const WHATSAPP_FALLBACK = 'Hola, quiero más información';
+
+function buildWhatsAppUrl(config: BusinessConfig): string {
+  const number = config.whatsapp?.replace(/[^0-9]/g, '') ?? '';
+  const message = config.whatsappMessage?.trim() || WHATSAPP_FALLBACK;
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -52,14 +66,20 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
   const historyText = config.history || '';
   const missionText = config.mission || '';
   const visionText = config.vision || '';
-  const services: string[] = config.services?.length ? config.services : [];
-  const coverageAreas: string[] = config.coverageAreas?.length ? config.coverageAreas : [];
+  const services = config.services?.length ? config.services : [];
+  const coverageAreas = config.coverageAreas?.length ? config.coverageAreas : [];
   const paymentCards = config.paymentCards || [];
+  
+  // ── Nuevos campos Fase 2 ──
+  const gallery = config.gallery || [];
+  const values = config.values || [];
+  const stats = config.stats || [];
+  const testimonials = config.testimonials || [];
+  const faqs = config.faqs || [];
 
   // ── Links de contacto ──────────────────────────────────────────────────────
   const phoneRaw = phone.replace(/[^0-9+]/g, '');
-  const waClean = whatsapp.replace(/[^0-9]/g, '');
-  const waLink = `https://wa.me/${waClean}?text=Hola,%20quiero%20cotizar`;
+  const waLink = buildWhatsAppUrl(config);
 
   const hasContact = phone || whatsapp || email;
   const hasHistoryOrMission = historyText || missionText || visionText;
@@ -110,13 +130,13 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
               {openingHours && (
                 <span className="flex items-center gap-1.5 bg-white text-violet-700 px-3 py-1.5 rounded-full border border-violet-200 shadow-sm">
-                  <Clock className="w-3.5 h-3.5" />
+                  <Icons.Clock className="w-3.5 h-3.5" />
                   {openingHours}
                 </span>
               )}
               {address && (
                 <span className="flex items-center gap-1.5 bg-white text-violet-700 px-3 py-1.5 rounded-full border border-violet-200 shadow-sm">
-                  <MapPin className="w-3.5 h-3.5" />
+                  <Icons.MapPin className="w-3.5 h-3.5" />
                   {address}
                 </span>
               )}
@@ -142,7 +162,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                         'active:scale-[0.97]'
                       )}
                     >
-                      <Phone className="w-4 h-4" />
+                      <Icons.Phone className="w-4 h-4" />
                       Cotizar por WhatsApp
                     </Link>
                   )}
@@ -156,7 +176,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                         'active:scale-[0.97]'
                       )}
                     >
-                      <Phone className="w-4 h-4" />
+                      <Icons.Phone className="w-4 h-4" />
                       Llamar {phone}
                     </a>
                   )}
@@ -171,7 +191,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
       </section>
 
       {/* ── CARRUSEL ────────────────────────────────────────────────── */}
-      <ProductCarousel />
+      {gallery.length > 0 && <ProductCarousel items={gallery} />}
 
       {/* ── CONTENT ─────────────────────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-16 space-y-8">
@@ -208,6 +228,24 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
           </div>
         )}
 
+        {/* Valores */}
+        {values.length > 0 && (
+          <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-6 text-center">Nuestros valores</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {values.map((v) => (
+                <div key={v.id} className="text-center">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+                    <ValueIcon name={v.icon} />
+                  </div>
+                  <h3 className="font-bold text-violet-900 text-sm mb-1">{v.title}</h3>
+                  {v.description && <p className="text-violet-600 text-sm">{v.description}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Catálogo de Servicios — solo si tiene items */}
         {services.length > 0 && (
           <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
@@ -237,7 +275,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
         {paymentCards.length > 0 && (
           <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-2 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-violet-600" />
+              <Icons.CreditCard className="w-5 h-5 text-violet-600" />
               Cuentas para anticipos y transferencias
             </h2>
             <p className="text-xs text-violet-500 mb-4">
@@ -259,19 +297,75 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
           </section>
         )}
 
-        {/* Cobertura — solo si hay áreas */}
-        {coverageAreas.length > 0 && (
+        {/* Métricas + Cobertura */}
+        {(stats.length > 0 || coverageAreas.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {stats.length > 0 && (
+              <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-5">En números</h2>
+                <dl className="grid grid-cols-3 gap-4 text-center">
+                  {stats.map((stat) => (
+                    <div key={stat.id}>
+                      <dt className="text-2xl sm:text-3xl font-bold text-violet-900">{stat.value}</dt>
+                      <dd className="text-violet-600 text-xs sm:text-sm mt-1">{stat.label}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
+            {coverageAreas.length > 0 && (
+              <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-3">Cobertura</h2>
+                <div className="flex items-start gap-3">
+                  <Icons.MapPin className="w-5 h-5 text-violet-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-violet-600 text-sm leading-relaxed">
+                    {address && <><strong className="text-violet-700">{address}</strong>. </>}
+                    Cobertura disponible en:{' '}
+                    <strong className="text-violet-700">
+                      {coverageAreas.join(', ')}
+                    </strong>.
+                  </p>
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
+        {/* Testimonios */}
+        {testimonials.length > 0 && (
           <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-3">Cobertura</h2>
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-violet-600 mt-0.5 flex-shrink-0" />
-              <p className="text-violet-600 text-sm leading-relaxed">
-                {address && <><strong className="text-violet-700">{address}</strong>. </>}
-                Cobertura disponible en:{' '}
-                <strong className="text-violet-700">
-                  {coverageAreas.join(', ')}
-                </strong>.
-              </p>
+            <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-5">Lo que dicen nuestros clientes</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {testimonials.map((t) => (
+                <div key={t.id} className="bg-violet-50 border border-violet-200 rounded-xl p-4">
+                  <div className="flex gap-0.5 mb-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Icons.Star
+                        key={i}
+                        className={cn(
+                          'w-3.5 h-3.5',
+                          i < t.rating ? 'text-amber-400 fill-amber-400' : 'text-violet-200'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-violet-700 text-sm mb-3 italic">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-violet-900 font-bold text-xs">— {t.author}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* FAQ */}
+        {faqs.length > 0 && (
+          <section className="bg-white rounded-2xl shadow-sm border border-violet-100 p-5 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-violet-900 mb-5">Preguntas frecuentes</h2>
+            <div className="space-y-2.5">
+              {faqs.map((faq) => (
+                <FaqItem key={faq.id} question={faq.question} answer={faq.answer} />
+              ))}
             </div>
           </section>
         )}
@@ -285,7 +379,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
           </h2>
           {openingHours && (
             <p className="text-violet-200 mb-3 text-sm flex items-center justify-center gap-2">
-              <Clock className="w-4 h-4" />
+              <Icons.Clock className="w-4 h-4" />
               {openingHours}
             </p>
           )}
@@ -308,7 +402,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                       'active:scale-[0.97]'
                     )}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Icons.Phone className="w-4 h-4" />
                     WhatsApp
                   </Link>
                 )}
@@ -322,7 +416,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                       'active:scale-[0.97]'
                     )}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Icons.Phone className="w-4 h-4" />
                     Llamar {phone}
                   </a>
                 )}
@@ -337,7 +431,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                       'active:scale-[0.97]'
                     )}
                   >
-                    <Mail className="w-4 h-4" />
+                    <Icons.Mail className="w-4 h-4" />
                     {email}
                   </a>
                 )}

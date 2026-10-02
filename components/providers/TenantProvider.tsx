@@ -67,6 +67,12 @@ export function useTenant() {
   const services = config.services ?? [];
   const coverageAreas = config.coverageAreas ?? [];
   const paymentCards = config.paymentCards ?? [];
+  const whatsappMessage = config.whatsappMessage || null;
+  const gallery = config.gallery ?? [];
+  const values = config.values ?? [];
+  const stats = config.stats ?? [];
+  const testimonials = config.testimonials ?? [];
+  const faqs = config.faqs ?? [];
 
   return {
     negocio,
@@ -85,5 +91,11 @@ export function useTenant() {
     services,
     coverageAreas,
     paymentCards,
+    whatsappMessage,
+    gallery,
+    values,
+    stats,
+    testimonials,
+    faqs,
   };
 }

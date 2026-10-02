@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -10,48 +10,14 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import type { GalleryItem } from '@/types/finance';
 
-const products = [
-  {
-    src: '/products/IMG-20260411-WA0028.jpg',
-    alt: 'Sillas y mesas para evento',
-    label: 'Mesas y sillas',
-  },
-  {
-    src: '/products/IMG-20260425-WA0023.jpg',
-    alt: 'Montaje de mobiliario para fiesta',
-    label: 'Montaje profesional',
-  },
-  {
-    src: '/products/IMG-20260501-WA0000.jpg',
-    alt: 'Decoración y mantelería para eventos',
-    label: 'Mantelería y decoración',
-  },
-  {
-    src: '/products/IMG-20260501-WA0001.jpg',
-    alt: 'Carpas y mobiliario exterior',
-    label: 'Carpas y mobiliario',
-  },
-  {
-    src: '/products/1775921919650.png',
-    alt: 'Paquete completo para eventos',
-    label: 'Paquetes completos',
-  },
-  {
-    src: '/products/2.png',
-    alt: 'Artículos para fiestas',
-    label: 'Artículos para fiestas',
-  },
-  {
-    src: '/products/bolos.png',
-    alt: 'Bolos para fiestas',
-    label: 'Bolos para fiestas',
-  },
-];
+interface ProductCarouselProps {
+  items: GalleryItem[];
+}
 
-export default function ProductCarousel() {
+export default function ProductCarousel({ items }: ProductCarouselProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -96,6 +62,8 @@ export default function ProductCarousel() {
     }
   };
 
+  if (!items || items.length === 0) return null;
+
   return (
     <section className="w-full py-8 sm:py-10">
       <div className="max-w-6xl mx-auto px-4">
@@ -120,16 +88,16 @@ export default function ProductCarousel() {
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {products.map((product, index) => (
+              {items.map((product) => (
                 <CarouselItem
-                  key={index}
+                  key={product.id}
                   className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
                 >
                   <div className="relative overflow-hidden rounded-2xl border border-violet-100 shadow-sm bg-white group active:scale-[0.98] transition-transform">
                     <div className="relative h-48 sm:h-56 lg:h-64 w-full">
                       <Image
-                        src={product.src}
-                        alt={product.alt}
+                        src={product.url}
+                        alt={product.alt ?? product.label ?? 'Imagen del catálogo'}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -137,11 +105,13 @@ export default function ProductCarousel() {
                       {/* Gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-violet-900/60 via-transparent to-transparent" />
                       {/* Label */}
-                      <div className="absolute bottom-3 left-3 right-3">
-                        <span className="inline-block bg-white/90 backdrop-blur-sm text-violet-800 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-sm">
-                          {product.label}
-                        </span>
-                      </div>
+                      {product.label && (
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <span className="inline-block bg-white/90 backdrop-blur-sm text-violet-800 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-sm">
+                            {product.label}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CarouselItem>

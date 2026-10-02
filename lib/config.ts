@@ -18,6 +18,12 @@ export const defaultBusinessConfig: BusinessConfig = {
   vision: '',
   openingHours: '',
   termsAndConditions: '',
+  whatsappMessage: null,
+  gallery: [],
+  values: [],
+  stats: [],
+  testimonials: [],
+  faqs: [],
   paymentCards: [],
   coverageAreas: [],
 };

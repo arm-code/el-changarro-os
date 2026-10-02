@@ -159,6 +159,44 @@ export interface PaymentCard {
   beneficiary: string;
 }
 
+export interface GalleryItem {
+  id: string;
+  url: string;          // URL pública de Supabase Storage (CDN)
+  label: string | null; // Etiqueta legible, p.ej: "Mesas y sillas"
+  alt: string | null;   // Texto alternativo accesible
+  order: number;        // Ya viene ordenado ASC desde el backend
+}
+
+export interface BusinessValue {
+  id: string;
+  title: string;            // p.ej: "Responsabilidad"
+  description: string | null;
+  icon: string | null;      // Nombre de ícono lucide-react, p.ej: "clock"
+  order: number;
+}
+
+export interface BusinessStat {
+  id: string;
+  value: string;  // String libre, p.ej: "+500", "8+", "100%"
+  label: string;  // p.ej: "eventos atendidos"
+  order: number;
+}
+
+export interface Testimonial {
+  id: string;
+  text: string;
+  author: string;
+  rating: number; // 1–5 (para renderizar estrellas)
+  order: number;
+}
+
+export interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+  order: number;
+}
+
 export interface BusinessConfig {
   id?: string;
   name: string;
@@ -176,6 +214,12 @@ export interface BusinessConfig {
   vision?: string;
   openingHours?: string;
   paymentCards: PaymentCard[];
+  whatsappMessage?: string | null;
+  gallery?: GalleryItem[];
+  values?: BusinessValue[];
+  stats?: BusinessStat[];
+  testimonials?: Testimonial[];
+  faqs?: Faq[];
   createdAt?: string;
   updatedAt?: string;
 }
