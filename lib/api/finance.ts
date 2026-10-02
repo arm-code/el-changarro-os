@@ -154,8 +154,20 @@ export const financeApi = {
     if (typeof data.mission === 'string') payload.mission = data.mission.trim();
     if (typeof data.vision === 'string') payload.vision = data.vision.trim();
     if (typeof data.openingHours === 'string') payload.openingHours = data.openingHours.trim();
+    if (typeof data.whatsappMessage === 'string' || data.whatsappMessage === null) payload.whatsappMessage = data.whatsappMessage;
 
     const res = await axiosInstance.patch<BusinessConfig>(`${PREFIX}/config`, payload);
+    return res.data;
+  },
+
+  uploadLogo: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/logo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
 

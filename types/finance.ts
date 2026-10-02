@@ -239,6 +239,7 @@ export interface UpdateBusinessConfigDto {
   mission?: string;
   vision?: string;
   openingHours?: string;
+  whatsappMessage?: string | null;
 }
 
 export interface CreatePaymentCardDto {

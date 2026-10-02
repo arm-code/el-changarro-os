@@ -21,6 +21,7 @@ const EDITABLE_KEYS = [
     'history',
     'mission',
     'vision',
+    'whatsappMessage',
 ] as const
 
 type EditableKey = (typeof EDITABLE_KEYS)[number]
@@ -52,5 +53,5 @@ export function useBusinessConfig() {
         onError: (err: unknown) => console.error('[useBusinessConfig] updateConfig', err),
     })
 
-    return { ...query, config: query.data as BusinessConfig | undefined, save }
+    return { ...query, config: query.data as BusinessConfig | undefined, save, queryClient }
 }
