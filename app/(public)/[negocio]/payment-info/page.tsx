@@ -326,31 +326,44 @@ export default function PaymentInfoPage() {
         </motion.div>
 
         {/* CTA WhatsApp */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white border border-violet-100 rounded-2xl p-5 sm:p-6 text-center shadow-sm"
-        >
-          <p className="text-violet-700 font-semibold text-sm mb-4">
-            ¿Ya hiciste tu transferencia?
-          </p>
-          <Link
-            href={`https://wa.me/${whatsapp}?text=Hola,%20realicé%20mi%20transferencia%20y%20quiero%20confirmar%20mi%20reserva`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              'flex items-center justify-center gap-2 h-12 rounded-xl font-bold text-sm',
-              'bg-green-600 text-white hover:bg-green-700 active:bg-green-800',
-              'transition-colors shadow-md shadow-green-600/20',
-              'w-full'
-            )}
+        {whatsapp ? (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white border border-violet-100 rounded-2xl p-5 sm:p-6 text-center shadow-sm"
           >
-            <Phone className="w-5 h-5" />
-            <span>Enviar comprobante por WhatsApp</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
+            <p className="text-violet-700 font-semibold text-sm mb-4">
+              ¿Ya hiciste tu transferencia?
+            </p>
+            <Link
+              href={`https://wa.me/${whatsapp}?text=Hola,%20realicé%20mi%20transferencia%20y%20quiero%20confirmar%20mi%20reserva`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'flex items-center justify-center gap-2 h-12 rounded-xl font-bold text-sm',
+                'bg-green-600 text-white hover:bg-green-700 active:bg-green-800',
+                'transition-colors shadow-md shadow-green-600/20',
+                'w-full'
+              )}
+            >
+              <Phone className="w-5 h-5" />
+              <span>Enviar comprobante por WhatsApp</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gray-50 border border-gray-200 rounded-2xl p-5 sm:p-6 text-center shadow-sm"
+          >
+            <p className="text-gray-500 font-semibold text-sm">
+              Contacto no disponible por el momento.
+            </p>
+          </motion.div>
+        )}
       </div>
     </div>
   );

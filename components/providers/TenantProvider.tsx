@@ -43,6 +43,7 @@ export function TenantProvider({
 /**
  * Hook para consumir el contexto del negocio en cualquier componente hijo.
  * Devuelve los datos del negocio y un objeto `config` con fallbacks seguros.
+ * Solo expone datos reales del backend — sin fallbacks hardcodeados de ningún negocio.
  */
 export function useTenant() {
   const ctx = useContext(TenantContext);
@@ -53,12 +54,18 @@ export function useTenant() {
   const { negocio, publicBusiness, isLoading } = ctx;
 
   const config = publicBusiness?.config ?? defaultBusinessConfig;
-  const businessName = publicBusiness?.name ?? config.name ?? 'Negocio';
-  const logoUrl = publicBusiness?.logoUrl ?? config.logoUrl ?? '/images/eventos-mendoza.png';
-  const whatsapp = config.whatsapp ?? '526566031549';
-  const phone = config.phone ?? '';
-  const email = config.email ?? '';
-  const address = config.address ?? '';
+  const businessName = publicBusiness?.name || config.name || '';
+  // logoUrl: null del API significa que el negocio no ha subido logo — no usar imagen de otro negocio
+  const logoUrl = publicBusiness?.logoUrl || config.logoUrl || '';
+  const whatsapp = config.whatsapp || '';
+  const phone = config.phone || '';
+  const email = config.email || '';
+  const address = config.address || '';
+  const openingHours = config.openingHours || '';
+  const termsAndConditions = config.termsAndConditions || '';
+  const description = config.description || '';
+  const services = config.services ?? [];
+  const coverageAreas = config.coverageAreas ?? [];
   const paymentCards = config.paymentCards ?? [];
 
   return {
@@ -72,6 +79,11 @@ export function useTenant() {
     phone,
     email,
     address,
+    openingHours,
+    termsAndConditions,
+    description,
+    services,
+    coverageAreas,
     paymentCards,
   };
 }
