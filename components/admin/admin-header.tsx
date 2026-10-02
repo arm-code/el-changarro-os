@@ -22,7 +22,7 @@ import {
     DrawerTrigger
 } from '@/components/ui/drawer'
 import { AdminSidebarContent } from './admin-sidebar'
-import { BusinessSwitcher } from './BusinessSwitcher'
+import { BusinessBadge } from './BusinessBadge'
 import { cn } from '@/lib/utils'
 
 export function AdminHeader() {
@@ -32,7 +32,7 @@ export function AdminHeader() {
     return (
         <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-xl md:hidden">
             <div className="flex min-w-0 max-w-[65%] items-center gap-2">
-                <BusinessSwitcher compact />
+                <BusinessBadge compact />
             </div>
 
             <div className="flex items-center gap-1">

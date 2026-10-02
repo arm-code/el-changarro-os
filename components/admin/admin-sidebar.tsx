@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/auth'
 import { isActive, primaryNav } from '@/lib/nav'
 import { Button } from '@/components/ui/button'
 
-import { BusinessSwitcher } from './BusinessSwitcher'
+import { BusinessBadge } from './BusinessBadge'
 
 export function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname()
@@ -18,7 +18,7 @@ export function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void })
     return (
         <div className="flex h-full flex-col">
             <div className="border-b p-4 md:hidden">
-                <BusinessSwitcher />
+                <BusinessBadge />
             </div>
             <nav className="flex flex-col gap-1 p-3">
                 {items.map((item) => {
@@ -55,7 +55,7 @@ export function AdminSidebar() {
     return (
         <aside className="hidden w-64 shrink-0 flex-col border-r bg-background md:flex">
             <div className="border-b p-4">
-                <BusinessSwitcher />
+                <BusinessBadge />
             </div>
 
             <div className="flex-1 overflow-y-auto">
