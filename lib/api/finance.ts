@@ -213,4 +213,60 @@ export const financeApi = {
     const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/gallery/${itemId}`);
     return res.data;
   },
+
+  // --- Values ---
+  addValue: async (data: { title: string; description?: string; icon?: string; order?: number }) => {
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/values`, data);
+    return res.data;
+  },
+  updateValue: async (id: string, data: Partial<{ title: string; description: string; icon: string; order: number }>) => {
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/values/${id}`, data);
+    return res.data;
+  },
+  removeValue: async (id: string) => {
+    const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/values/${id}`);
+    return res.data;
+  },
+
+  // --- Stats ---
+  addStat: async (data: { value: string; label: string; order?: number }) => {
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/stats`, data);
+    return res.data;
+  },
+  updateStat: async (id: string, data: Partial<{ value: string; label: string; order: number }>) => {
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/stats/${id}`, data);
+    return res.data;
+  },
+  removeStat: async (id: string) => {
+    const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/stats/${id}`);
+    return res.data;
+  },
+
+  // --- Testimonials ---
+  addTestimonial: async (data: { text: string; author: string; rating?: number; order?: number }) => {
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/testimonials`, data);
+    return res.data;
+  },
+  updateTestimonial: async (id: string, data: Partial<{ text: string; author: string; rating: number; order: number }>) => {
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/testimonials/${id}`, data);
+    return res.data;
+  },
+  removeTestimonial: async (id: string) => {
+    const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/testimonials/${id}`);
+    return res.data;
+  },
+
+  // --- FAQs ---
+  addFaq: async (data: { question: string; answer: string; order?: number }) => {
+    const res = await axiosInstance.post<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/faqs`, data);
+    return res.data;
+  },
+  updateFaq: async (id: string, data: Partial<{ question: string; answer: string; order: number }>) => {
+    const res = await axiosInstance.patch<{ success: boolean; data: BusinessConfig }>(`${PREFIX}/config/faqs/${id}`, data);
+    return res.data;
+  },
+  removeFaq: async (id: string) => {
+    const res = await axiosInstance.delete<{ success: boolean }>(`${PREFIX}/config/faqs/${id}`);
+    return res.data;
+  },
 };

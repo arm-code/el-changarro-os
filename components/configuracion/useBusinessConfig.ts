@@ -68,13 +68,81 @@ export function useBusinessConfig() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
     })
 
+    // --- Values ---
+    const addValue = useMutation({
+        mutationFn: financeApi.addValue,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const updateValue = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Parameters<typeof financeApi.updateValue>[1] }) => financeApi.updateValue(id, data),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const removeValue = useMutation({
+        mutationFn: financeApi.removeValue,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    // --- Stats ---
+    const addStat = useMutation({
+        mutationFn: financeApi.addStat,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const updateStat = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Parameters<typeof financeApi.updateStat>[1] }) => financeApi.updateStat(id, data),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const removeStat = useMutation({
+        mutationFn: financeApi.removeStat,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    // --- Testimonials ---
+    const addTestimonial = useMutation({
+        mutationFn: financeApi.addTestimonial,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const updateTestimonial = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Parameters<typeof financeApi.updateTestimonial>[1] }) => financeApi.updateTestimonial(id, data),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const removeTestimonial = useMutation({
+        mutationFn: financeApi.removeTestimonial,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
+    // --- FAQs ---
+    const addFaq = useMutation({
+        mutationFn: financeApi.addFaq,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const updateFaq = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Parameters<typeof financeApi.updateFaq>[1] }) => financeApi.updateFaq(id, data),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+    const removeFaq = useMutation({
+        mutationFn: financeApi.removeFaq,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['businessConfig'] }),
+    })
+
     return { 
         ...query, 
         config: query.data as BusinessConfig | undefined, 
         save, 
         addGallery, 
         updateGallery, 
-        removeGallery, 
+        removeGallery,
+        addValue,
+        updateValue,
+        removeValue,
+        addStat,
+        updateStat,
+        removeStat,
+        addTestimonial,
+        updateTestimonial,
+        removeTestimonial,
+        addFaq,
+        updateFaq,
+        removeFaq,
         queryClient 
     }
 }

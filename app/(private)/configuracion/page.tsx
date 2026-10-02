@@ -16,15 +16,18 @@ import { BankAccountsSheet } from '@/components/configuracion/BankAccountsSheet'
 import { TermsSheet } from '@/components/configuracion/TermsSheet'
 import { PublicPageSheet } from '@/components/configuracion/PublicPageSheet'
 import { GallerySheet } from '@/components/configuracion/GallerySheet'
+import { ValuesSheet } from '@/components/configuracion/ValuesSheet'
+import { StatsSheet } from '@/components/configuracion/StatsSheet'
+import { TestimonialsSheet } from '@/components/configuracion/TestimonialsSheet'
+import { FaqsSheet } from '@/components/configuracion/FaqsSheet'
 import { Button } from '@/components/ui/button'
 
-type SectionKey = 'business' | 'accounts' | 'terms' | 'page' | 'gallery'
+type SectionKey = 'business' | 'accounts' | 'terms' | 'page' | 'gallery' | 'values' | 'stats' | 'testimonials' | 'faqs'
 
 interface Section {
   key: SectionKey
   title: string
   summary: string
-  /** Falta algo importante: el resumen se muestra como aviso. */
   needsAttention?: boolean
 }
 
@@ -69,6 +72,34 @@ function buildSections(config: BusinessConfig, accounts: PaymentCard[]): Section
       summary: config.gallery?.length
         ? `${plural(config.gallery.length, 'imagen', 'imágenes')}`
         : 'Sube fotos de tus productos',
+    },
+    {
+      key: 'values',
+      title: 'Valores corporativos',
+      summary: config.values?.length
+        ? `${plural(config.values.length, 'valor', 'valores')}`
+        : 'Misión, visión y valores',
+    },
+    {
+      key: 'stats',
+      title: 'En números',
+      summary: config.stats?.length
+        ? `${plural(config.stats.length, 'estadística', 'estadísticas')}`
+        : 'Agrega cifras destacadas',
+    },
+    {
+      key: 'testimonials',
+      title: 'Testimonios',
+      summary: config.testimonials?.length
+        ? `${plural(config.testimonials.length, 'testimonio', 'testimonios')}`
+        : 'Lo que dicen tus clientes',
+    },
+    {
+      key: 'faqs',
+      title: 'Preguntas frecuentes',
+      summary: config.faqs?.length
+        ? `${plural(config.faqs.length, 'pregunta', 'preguntas')}`
+        : 'Resuelve dudas comunes',
     },
   ]
 }
@@ -124,6 +155,10 @@ export default function ConfigurationPage() {
           <TermsSheet open={openSection === 'terms'} onOpenChange={close} />
           <PublicPageSheet open={openSection === 'page'} onOpenChange={close} />
           <GallerySheet open={openSection === 'gallery'} onOpenChange={close} />
+          <ValuesSheet open={openSection === 'values'} onOpenChange={close} />
+          <StatsSheet open={openSection === 'stats'} onOpenChange={close} />
+          <TestimonialsSheet open={openSection === 'testimonials'} onOpenChange={close} />
+          <FaqsSheet open={openSection === 'faqs'} onOpenChange={close} />
         </>
       )}
     </div>
