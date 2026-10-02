@@ -5,6 +5,7 @@ import React from 'react'
 import Image from 'next/image'
 import { Building2 } from 'lucide-react'
 import { useBusiness } from '@/lib/business'
+import { useBusinessConfig } from '@/components/configuracion/useBusinessConfig'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface BusinessBadgeProps {
@@ -12,10 +13,16 @@ interface BusinessBadgeProps {
 }
 
 export function BusinessBadge({ compact = false }: BusinessBadgeProps) {
-  const { business, loading } = useBusiness()
+  const { business, loading: businessLoading } = useBusiness()
+  const { config, isLoading: configLoading } = useBusinessConfig()
 
-  const businessName = business?.name || 'Eventos Mendoza'
-  const logoUrl = business?.logoUrl || '/images/eventos-mendoza.png'
+  const loading = businessLoading || configLoading
+  
+  // Usar el nombre de config si existe, sino el de business, sino fallback genérico
+  const businessName = config?.name || business?.name || 'Mi Negocio'
+  
+  // Utilizar estrictamente el logo del backend
+  const logoUrl = config?.logoUrl || business?.logoUrl
 
   if (compact) {
     return (
