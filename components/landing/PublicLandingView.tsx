@@ -8,7 +8,7 @@ import { LandingSkeleton } from './LandingSkeleton';
 import {
     Hero, Services, About, Testimonials, Faq, Payments, Contact, Footer, getSectionLinks,
 } from './sections';
-import { MobileActionBar, SiteHeader } from './chrome';
+import { MobileActionBar } from './chrome';
 import { AlertCircle } from 'lucide-react';
 
 function StateLayout({ children }: { children: ReactNode }) {
@@ -52,7 +52,6 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
         // `.landing` + data-palette activan las variables --brand-* de landing-palettes.css.
         // (Antes se usaba `theme-${palette}`, que no existe: todos los bg-brand-* salían transparentes.)
         <div className="landing min-h-dvh bg-background text-foreground" data-palette={model.palette}>
-            <SiteHeader model={model} slug={negocio} sections={sections} />
             <main>
                 <Hero model={model} />
                 {/* Fondos alternos automáticos: no se repiten aunque falte alguna sección */}

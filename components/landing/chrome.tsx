@@ -55,9 +55,9 @@ function useActiveSection(ids: string[]) {
 
 // ─── Header fijo con logo + navegación por secciones ─────────────────────────
 export function SiteHeader({
-    model, slug, sections,
+    model, slug, sections = [],
 }: {
-    model: LandingModel; slug: string; sections: SectionLink[];
+    model: LandingModel; slug: string; sections?: SectionLink[];
 }) {
     // El nombre aparece en el header solo cuando el <h1> del Hero ya salió de pantalla
     const heroTitleVisible = useInView('inicio-title', '-56px 0px 0px 0px');
