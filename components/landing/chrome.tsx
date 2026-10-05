@@ -76,7 +76,7 @@ export function SiteHeader({
     return (
         <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
             <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
-                <a href="#inicio" className="flex min-w-0 items-center gap-2.5" aria-label={`${model.name}, ir al inicio`}>
+                <Link href={`/${slug}`} className="flex min-w-0 items-center gap-2.5" aria-label={`${model.name}, ir al inicio`}>
                     {model.logoUrl ? (
                         <span className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-background ring-1 ring-border">
                             <Image src={model.logoUrl} alt="" fill sizes="36px" className="object-contain p-0.5" />
@@ -94,7 +94,7 @@ export function SiteHeader({
                     >
                         {model.name}
                     </span>
-                </a>
+                </Link>
 
                 <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                     <ShareButton path={`/${slug}`} title={model.name} label="Compartir" iconOnly />
@@ -113,6 +113,11 @@ export function SiteHeader({
                             <span className="sr-only">Menú</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem asChild>
+                                <Link href={`/${slug}`} className="cursor-pointer">
+                                    Inicio
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={`/${slug}/payment-info`} className="cursor-pointer">
                                     Datos bancarios
