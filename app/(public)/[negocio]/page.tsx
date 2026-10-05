@@ -1,18 +1,3 @@
-// page anterior
-
-// 'use client';
-
-// import { PublicLandingView } from '@/components/public/PublicLandingView';
-// import { useTenant } from '@/components/providers/TenantProvider';
-
-// export default function NegocioLandingPage() {
-//   const { negocio } = useTenant();
-//   return <PublicLandingView negocio={negocio} />;
-// }
-
-// termina page anterior
-
-
 import { cache } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -27,7 +12,6 @@ type Props = { params: Promise<{ negocio: string }> };
 const getBusiness = cache(async (slug: string) => {
   try {
     const data = await businessApi.getPublicBusinessBySlug(slug);
-    console.log('[landing] Data fetched:', data);
     return data ? ({ status: 'ok', data } as const) : ({ status: 'not-found' } as const);
   } catch (error) {
     console.error('[landing] Error inside getBusiness:', error);
