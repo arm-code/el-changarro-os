@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   CreditCard, Building2, User, Copy, CheckCircle2, Banknote,
-  ArrowRight, Phone, Share2, Loader2
+  ArrowRight, Phone, Share2, Loader2, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -121,7 +121,7 @@ export default function PaymentInfoPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Datos del negocio vienen del TenantProvider (API pública, sin auth)
-  const { isLoading, businessName, whatsapp, paymentCards } = useTenant();
+  const { negocio, isLoading, businessName, whatsapp, paymentCards } = useTenant();
 
   const copyToClipboard = async (text: string, field: string) => {
     const clean = text.replace(/\s/g, '');
@@ -159,22 +159,28 @@ export default function PaymentInfoPage() {
   };
 
   return (
-    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
-      {/* Header compacto */}
-      <div className="max-w-xl mx-auto text-center mb-8">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center justify-center w-14 h-14 bg-violet-100 rounded-2xl mb-3"
-        >
-          <Banknote className="w-7 h-7 text-violet-600" />
-        </motion.div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-violet-900 mb-2">
-          Datos para transferencia
-        </h1>
-        <p className="text-violet-600 text-sm sm:text-base max-w-md mx-auto">
-          Realiza tu pago de forma rápida y segura.
-        </p>
+    <div className="min-h-screen bg-violet-50 py-6 px-4 sm:px-6 lg:px-8">
+      {/* Header compacto con botón volver */}
+      <div className="max-w-xl mx-auto mb-8">
+        <Link href={`/${negocio}`} className="inline-flex items-center text-sm font-medium text-violet-600 hover:text-violet-800 mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
+          Volver al inicio
+        </Link>
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="inline-flex items-center justify-center w-14 h-14 bg-violet-100 rounded-2xl mb-3"
+          >
+            <Banknote className="w-7 h-7 text-violet-600" />
+          </motion.div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-violet-900 mb-2">
+            Datos para transferencia
+          </h1>
+          <p className="text-violet-600 text-sm sm:text-base max-w-md mx-auto">
+            Realiza tu pago de forma rápida y segura.
+          </p>
+        </div>
       </div>
 
       <div className="max-w-xl mx-auto space-y-5">

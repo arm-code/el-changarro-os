@@ -1,7 +1,15 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { Menu } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { LandingModel } from '@/lib/landing/model';
 import { CallLink, ShareButton, WhatsAppLink } from './actions';
@@ -88,7 +96,7 @@ export function SiteHeader({
                     </span>
                 </a>
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                     <ShareButton path={`/${slug}`} title={model.name} label="Compartir" iconOnly />
                     {model.whatsappNumber && (
                         <WhatsAppLink
@@ -99,6 +107,24 @@ export function SiteHeader({
                             WhatsApp
                         </WhatsAppLink>
                     )}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <Menu className="size-5" />
+                            <span className="sr-only">Menú</span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem asChild>
+                                <Link href={`/${slug}/payment-info`} className="cursor-pointer">
+                                    Datos bancarios
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/auth/login" className="cursor-pointer">
+                                    Administración
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
 
