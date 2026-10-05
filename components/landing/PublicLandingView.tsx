@@ -5,7 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { publicBusinessQuery } from '@/lib/landing/queries';
 import { toLandingModel } from '@/lib/landing/model';
 import { LandingSkeleton } from './LandingSkeleton';
-import { Hero, Services, About, Testimonials, Faq, Payments, Contact, Footer } from './sections';
+import {
+    Hero, Services, About, Testimonials, Faq, Payments, Contact, Footer, getSectionLinks,
+} from './sections';
+import { MobileActionBar, SiteHeader } from './chrome';
 import { AlertCircle } from 'lucide-react';
 
 function StateLayout({ children }: { children: ReactNode }) {
@@ -43,17 +46,27 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
     if (!data) return null;
 
     const model = toLandingModel(data);
+    const sections = getSectionLinks(model);
 
     return (
-        <main className={`bg-background text-foreground theme-${model.palette}`}>
-            <Hero model={model} />
-            <Services model={model} />
-            <About model={model} />
-            <Testimonials model={model} />
-            <Faq model={model} />
-            <Payments model={model} slug={negocio} />
-            <Contact model={model} slug={negocio} />
+        // `.landing` + data-palette activan las variables --brand-* de landing-palettes.css.
+        // (Antes se usaba `theme-${palette}`, que no existe: todos los bg-brand-* salían transparentes.)
+        <div className="landing min-h-dvh bg-background text-foreground" data-palette={model.palette}>
+            <SiteHeader model={model} slug={negocio} sections={sections} />
+            <main>
+                <Hero model={model} />
+                {/* Fondos alternos automáticos: no se repiten aunque falte alguna sección */}
+                <div className="[&>section:nth-of-type(even)]:bg-brand-soft">
+                    <Services model={model} />
+                    <Testimonials model={model} />
+                    <About model={model} />
+                    <Faq model={model} />
+                    <Payments model={model} slug={negocio} />
+                    <Contact model={model} slug={negocio} />
+                </div>
+            </main>
             <Footer model={model} />
-        </main>
+            <MobileActionBar model={model} />
+        </div>
     );
 }

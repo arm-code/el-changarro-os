@@ -23,7 +23,7 @@
   --brand-foreground: oklch(0.985 0 0);
 
   /* Derivados: no se tocan por paleta */
-  --brand-soft: color-mix(in oklch, var(--brand) 6%, var(--background));   /* fondos de banda */
+  --brand-soft: color-mix(in oklch, var(--brand) 8%, var(--background));   /* fondos de banda */
   --brand-muted: color-mix(in oklch, var(--brand) 16%, var(--background)); /* chips de iconos */
   --brand-ink: color-mix(in oklch, var(--brand) 82%, var(--foreground));   /* texto/iconos de acento */
 
@@ -31,6 +31,13 @@
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
   --ring: var(--brand);
+}
+
+/* Scroll suave al navegar por secciones (respeta "reducir movimiento") */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Servicios profesionales, consultorios, talleres */
