@@ -69,7 +69,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
   const services = config.services?.length ? config.services : [];
   const coverageAreas = config.coverageAreas?.length ? config.coverageAreas : [];
   const paymentCards = config.paymentCards || [];
-  
+
   // ── Nuevos campos Fase 2 ──
   const gallery = config.gallery || [];
   const values = config.values || [];
@@ -375,7 +375,7 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
       <section className="bg-gradient-to-br from-violet-600 to-violet-800 px-4 sm:px-6 py-10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-            {businessName ? `Contacta a ${businessName}` : '¿Listo para tu evento?'}
+            {businessName ? `Contacta a ${businessName}` : 'Cargando...'}
           </h2>
           {openingHours && (
             <p className="text-violet-200 mb-3 text-sm flex items-center justify-center gap-2">
