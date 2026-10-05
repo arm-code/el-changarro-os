@@ -1,6 +1,6 @@
 'use client';
 
-import { PublicLandingView } from '@/components/public/PublicLandingView';
+import { PublicLandingView } from '@/components/landing/PublicLandingView';
 import { getBusinessSlugFromHostname } from '@/lib/subdomain';
 
 export default function HomePage() {

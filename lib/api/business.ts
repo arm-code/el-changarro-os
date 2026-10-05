@@ -44,8 +44,18 @@ export const businessApi = {
   },
 
   getPublicBusinessBySlug: async (slug: string): Promise<PublicBusinessResponse> => {
-    const res = await axiosInstance.get<PublicBusinessResponse>(`${PREFIX}/public/${slug}`);
-    return res.data;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    const res = await fetch(`${baseUrl}/v1/businesses/public/${slug}`, {
+      next: { revalidate: 600 }
+    });
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw { status: 404 };
+      }
+      throw new Error(`Error API: ${res.status}`);
+    }
+    const json = await res.json();
+    return json;
   },
 
   /**
