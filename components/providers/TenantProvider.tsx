@@ -3,6 +3,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { businessApi } from '@/lib/api/business';
+import { publicBusinessQuery } from '@/lib/landing/queries';
 import { defaultBusinessConfig } from '@/lib/config';
 import type { PublicBusinessResponse } from '@/types/finance';
 
@@ -26,12 +27,7 @@ export function TenantProvider({
   children: ReactNode;
   negocio: string;
 }) {
-  const { data: publicBusiness, isLoading } = useQuery({
-    queryKey: ['publicBusiness', negocio],
-    queryFn: () => businessApi.getPublicBusinessBySlug(negocio),
-    staleTime: 1000 * 60 * 10, // 10 min cache
-    retry: 1,
-  });
+  const { data: publicBusiness, isLoading } = useQuery(publicBusinessQuery(negocio));
 
   return (
     <TenantContext.Provider value={{ negocio, publicBusiness, isLoading }}>

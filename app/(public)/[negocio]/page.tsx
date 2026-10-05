@@ -21,15 +21,16 @@ import { businessApi } from '@/lib/api/business';
 import { isNotFound, publicBusinessQuery, SLUG_PATTERN } from '@/lib/landing/queries';
 import { PublicLandingView } from '@/components/landing/PublicLandingView';
 
-// Next 14: params no es una Promise.
-type Props = { params: { negocio: string } };
+// Next 15: params es una Promise.
+type Props = { params: Promise<{ negocio: string }> };
 
-// cache(): generateMetadata y la página comparten UNA sola petición por request.
 const getBusiness = cache(async (slug: string) => {
   try {
     const data = await businessApi.getPublicBusinessBySlug(slug);
+    console.log('[landing] Data fetched:', data);
     return data ? ({ status: 'ok', data } as const) : ({ status: 'not-found' } as const);
   } catch (error) {
+    console.error('[landing] Error inside getBusiness:', error);
     if (isNotFound(error)) return { status: 'not-found' } as const;
     // Log solo en servidor, sin detalles al usuario
     console.error('[landing] No se pudo obtener el negocio:', slug);
@@ -38,8 +39,8 @@ const getBusiness = cache(async (slug: string) => {
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { negocio } = params;
-  if (!SLUG_PATTERN.test(negocio)) return {};
+  const { negocio } = await params;
+  if (!negocio || !SLUG_PATTERN.test(negocio)) return {};
 
   const result = await getBusiness(negocio);
   if (result.status !== 'ok') return { title: 'Negocio no encontrado' };
@@ -60,17 +61,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicBusinessPage({ params }: Props) {
-  const { negocio } = params;
-  if (!SLUG_PATTERN.test(negocio)) notFound();
+  const { negocio } = await params;
+  if (!negocio || !SLUG_PATTERN.test(negocio)) notFound();
 
   const result = await getBusiness(negocio);
   if (result.status === 'not-found') notFound();
 
   const queryClient = new QueryClient();
   if (result.status === 'ok') {
-    queryClient.setQueryData(publicBusinessQuery(negocio).queryKey, result.data);
+    const innerData = (result.data as any).data ?? result.data;
+    queryClient.setQueryData(publicBusinessQuery(negocio).queryKey, innerData);
   }
-  // Si fue 'error' (red, 500) no se hidrata: el cliente reintenta y muestra su estado.
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
