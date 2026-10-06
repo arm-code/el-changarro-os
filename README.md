@@ -1,4 +1,4 @@
-# Eventos Mendoza App
+# El Changarro OS
 ---
 
 ### Pasos a seguir para poder ejecutar el proyecto
