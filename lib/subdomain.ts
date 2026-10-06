@@ -4,14 +4,14 @@
  */
 export function getBusinessSlugFromHostname(): string {
   if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG || 'eventos-mendoza';
+    return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG!;
   }
 
   const hostname = window.location.hostname; // ej. eventos-mendoza.arm-solutions.com.mx
 
   // Si es localhost o IP, retornar valor por defecto
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
-    return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG || 'eventos-mendoza';
+    return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG!;
   }
 
   const parts = hostname.split('.');
@@ -24,5 +24,5 @@ export function getBusinessSlugFromHostname(): string {
     }
   }
 
-  return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG || 'eventos-mendoza';
+  return process.env.NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG!;
 }
