@@ -3,18 +3,17 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Loader2, LogIn, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react'
 import { loginUser } from '@/actions/auth/login'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 /* ────────────────────────────────────────────────────────────────────────────
    COMPONENTE: LoginPage
    Diseñado mobile-first con targets táctiles amplios, feedback visual
-   inmediato, y estados de carga claros.
+   inmediato, y estados de carga claros. Estilos basados en la landing pública.
    ─────────────────────────────────────────────────────────────────────────── */
 
 export default function LoginPage() {
@@ -57,23 +56,17 @@ export default function LoginPage() {
   )
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-6 sm:px-6">
+    <div className="landing flex min-h-dvh items-center justify-center bg-brand-soft px-4 py-6 text-foreground sm:px-6">
       <div className="w-full max-w-sm">
         {/* ── Header ── */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-            <ShieldCheck className="size-8" aria-hidden />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            Iniciar sesión
+          <h1 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+            Accede a tu panel de control
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Accede a tu panel de gestión
-          </p>
         </div>
 
         {/* ── Formulario ── */}
-        <Card className="border-border bg-card p-5 shadow-xl sm:p-6">
+        <div className="rounded-2xl border bg-background p-5 shadow-sm sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
@@ -94,7 +87,7 @@ export default function LoginPage() {
                 autoFocus
                 required
                 className={cn(
-                  'h-12 text-base',
+                  'h-12 rounded-xl text-base',
                   message.type === 'error' && !email && 'border-destructive focus-visible:ring-destructive/20'
                 )}
               />
@@ -119,7 +112,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   className={cn(
-                    'h-12 pr-12 text-base',
+                    'h-12 rounded-xl pr-12 text-base',
                     message.type === 'error' && !password && 'border-destructive focus-visible:ring-destructive/20'
                   )}
                 />
@@ -128,7 +121,7 @@ export default function LoginPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-1 top-1/2 size-10 -translate-y-1/2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="absolute right-1 top-1/2 size-10 -translate-y-1/2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? (
@@ -165,7 +158,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-12 w-full font-bold text-sm shadow-lg shadow-primary/20 active:scale-[0.97] transition-transform"
+              className="h-12 w-full rounded-xl bg-brand font-bold text-sm text-brand-foreground shadow-sm transition-transform active:scale-[0.97] hover:bg-brand/90"
             >
               {loading ? (
                 <>
@@ -180,13 +173,34 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-        </Card>
+        </div>
+        
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Eventos Mendoza · Panel de administración
-        </p>
-      </div>
+        <div className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground">
+            Acceso exclusivo para administradores.
+          </p>
+          
+          <div className="mt-6 rounded-2xl border bg-background/60 p-4 shadow-sm backdrop-blur-md">
+            <p className="text-balance text-sm font-medium text-foreground">
+              ¿Te gustaría tener esta plataforma para tu propio negocio?
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground text-pretty">
+              Descubre cómo nuestro software de punto de venta y catálogo digital puede ayudarte a aumentar tus ventas.
+            </p>
+            <a
+              href="https://dejuarez.mx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-muted px-4 text-xs font-semibold text-foreground transition-colors hover:bg-brand hover:text-brand-foreground"
+            >
+              Conoce más en dejuarez.mx
+              <ExternalLink className="size-3.5" aria-hidden />
+            </a>
+          </div>
+        </div>
+    </div>
     </div>
   )
 }
