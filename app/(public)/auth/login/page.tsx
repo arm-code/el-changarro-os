@@ -3,7 +3,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Loader2, LogIn, AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { loginUser } from '@/actions/auth/login'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,9 @@ import { cn } from '@/lib/utils'
 /* ────────────────────────────────────────────────────────────────────────────
    COMPONENTE: LoginPage
    Diseñado mobile-first con targets táctiles amplios, feedback visual
-   inmediato, y estados de carga claros. Estilos basados en la landing pública.
+   inmediato, y estados de carga claros. Usa los tokens neutros del panel
+   (no la paleta de marca de la landing pública) para que no compita con el
+   resto del dashboard.
    ─────────────────────────────────────────────────────────────────────────── */
 
 export default function LoginPage() {
@@ -56,24 +58,24 @@ export default function LoginPage() {
   )
 
   return (
-    <div className="landing flex min-h-dvh items-center justify-center bg-brand-soft px-4 py-6 text-foreground sm:px-6">
+    <div className="flex min-h-dvh items-center justify-center bg-muted/30 px-4 py-6 text-foreground sm:px-6">
       <div className="w-full max-w-sm">
         {/* ── Header ── */}
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">
-            Accede a tu panel de control
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-semibold tracking-tight text-balance sm:text-2xl">
+            Iniciar sesión
           </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Panel de administración de tu negocio
+          </p>
         </div>
 
         {/* ── Formulario ── */}
-        <div className="rounded-2xl border bg-background p-5 shadow-sm sm:p-6">
+        <div className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
-              <Label
-                htmlFor="email"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-              >
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Correo electrónico
               </Label>
               <Input
@@ -95,10 +97,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <Label
-                htmlFor="password"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-              >
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Contraseña
               </Label>
               <div className="relative">
@@ -158,7 +157,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-12 w-full rounded-xl bg-brand font-bold text-sm text-brand-foreground shadow-sm transition-transform active:scale-[0.97] hover:bg-brand/90"
+              className="h-12 w-full rounded-xl text-sm font-semibold transition-transform active:scale-[0.97]"
             >
               {loading ? (
                 <>
@@ -174,33 +173,25 @@ export default function LoginPage() {
             </Button>
           </form>
         </div>
-        
 
         {/* Footer */}
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
             Acceso exclusivo para administradores.
           </p>
-          
-          <div className="mt-6 rounded-2xl border bg-background/60 p-4 shadow-sm backdrop-blur-md">
-            <p className="text-balance text-sm font-medium text-foreground">
-              ¿Te gustaría tener esta plataforma para tu propio negocio?
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground text-pretty">
-              Descubre cómo nuestro software de punto de venta y catálogo digital puede ayudarte a aumentar tus ventas.
-            </p>
+          <p className="mt-4 text-xs text-muted-foreground">
+            ¿Tienes un negocio?{' '}
             <a
               href="https://dejuarez.mx"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-muted px-4 text-xs font-semibold text-foreground transition-colors hover:bg-brand hover:text-brand-foreground"
+              className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
             >
-              Conoce más en dejuarez.mx
-              <ExternalLink className="size-3.5" aria-hidden />
+              Conoce ChangarroOS
             </a>
-          </div>
+          </p>
         </div>
-    </div>
+      </div>
     </div>
   )
 }
