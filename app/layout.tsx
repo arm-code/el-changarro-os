@@ -4,6 +4,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import PwaRegistration from '@/components/PwaRegistration';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/next';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { AuthProvider } from '@/lib/auth';
 import { BusinessProvider } from '@/lib/business';
@@ -75,6 +76,7 @@ export default function RootLayout({
             </BusinessProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );
