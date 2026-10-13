@@ -2,7 +2,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { Loader2, Plus } from 'lucide-react'
 import { inventarioApi } from '@/lib/inventario/api'
 import { describeDate, parseDate, toLocalDateInput } from '@/lib/display'
@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/card'
 import { MobileFab } from '@/components/ui/mobile-fab'
 import { LABEL, TOUCH } from '@/components/ui/detail'
 import { EmptyState, InlineError, ListSkeleton } from '@/components/ui/states'
-import CreateMovementModal from '@/components/inventario/modals/CreateMovementModal'
+import MovementFormSheet from '@/components/inventario/modals/MovementFormSheet'
 import type { InventoryMovement, InventoryMovementType } from '@/lib/inventario/types'
 
 const PAGE_SIZE = 30
@@ -74,7 +74,6 @@ function groupByDay(list: InventoryMovement[]) {
 /* ─── Componente ────────────────────────────────────────────────────────── */
 
 export default function MovementsTab() {
-  const queryClient = useQueryClient()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const listQuery = useInfiniteQuery({
@@ -82,18 +81,6 @@ export default function MovementsTab() {
     queryFn: ({ pageParam }) => inventarioApi.getMovements({ page: pageParam, limit: PAGE_SIZE }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.meta?.hasNextPage ? (last.meta.page ?? 1) + 1 : undefined),
-  })
-
-  // Solo el formulario las necesita: se piden al abrirlo
-  const itemsQuery = useQuery({
-    queryKey: ['inventory', 'items', 'for-movements'],
-    queryFn: () => inventarioApi.getItems({ limit: 100 }),
-    enabled: isCreateOpen,
-  })
-  const locationsQuery = useQuery({
-    queryKey: ['inventory', 'locations'],
-    queryFn: () => inventarioApi.getLocations(),
-    enabled: isCreateOpen,
   })
 
   const movements = useMemo(() => {
@@ -190,18 +177,7 @@ export default function MovementsTab() {
         title="Nuevo movimiento"
       />
 
-      <CreateMovementModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreated={() => {
-          setIsCreateOpen(false)
-          // El movimiento cambia las existencias: la lista de artículos también se refresca
-          queryClient.invalidateQueries({ queryKey: ['inventory', 'movements'] })
-          queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] })
-        }}
-        items={itemsQuery.data?.items ?? []}
-        locations={locationsQuery.data ?? []}
-      />
+      <MovementFormSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </div>
   )
 }
