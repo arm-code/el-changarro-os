@@ -18,7 +18,8 @@ import { ItemTypeIcon } from '@/components/inventario/ItemTypeIcon'
 import CreateItemModal from '@/components/inventario/modals/CreateItemModal'
 import EditItemModal from '@/components/inventario/modals/EditItemModal'
 import ItemDetailSheet from '@/components/inventario/modals/ItemDetailSheet'
-import type { InventoryItem, InventoryItemStatus } from '@/lib/inventario/types'
+import { ITEM_STATUS_LABEL, isAlertStatus } from '@/lib/inventario/labels'
+import type { InventoryItem } from '@/lib/inventario/types'
 
 const PAGE_SIZE = 30
 
@@ -26,21 +27,9 @@ const PAGE_SIZE = 30
    Un solo texto por fila, sin chips de color. Lo normal (disponible) no se
    anuncia; solo se destaca lo que requiere atención. */
 
-const STATUS_LABEL: Record<InventoryItemStatus, string> = {
-  available: 'Disponible',
-  rented: 'En renta',
-  maintenance: 'En mantenimiento',
-  damaged: 'Dañado',
-  lost: 'Perdido',
-  retired: 'Retirado',
-}
-
 function describeStock(item: InventoryItem): { text: string; alert: boolean } | null {
-  if (item.status === 'damaged' || item.status === 'lost') {
-    return { text: STATUS_LABEL[item.status], alert: true }
-  }
   if (item.status !== 'available') {
-    return { text: STATUS_LABEL[item.status], alert: false }
+    return { text: ITEM_STATUS_LABEL[item.status], alert: isAlertStatus(item.status) }
   }
   const { total, available } = item.stock
   if (total <= 0) return null
