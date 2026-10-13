@@ -2,7 +2,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { ChevronRight, Loader2, Plus } from 'lucide-react'
 import { inventarioApi } from '@/lib/inventario/api'
 import { formatCurrency } from '@/lib/format'
@@ -15,8 +15,7 @@ import { SearchInput } from '@/components/ui/search-input'
 import { TOUCH } from '@/components/ui/detail'
 import { EmptyState, InlineError, ListSkeleton } from '@/components/ui/states'
 import { ItemTypeIcon } from '@/components/inventario/ItemTypeIcon'
-import CreateItemModal from '@/components/inventario/modals/CreateItemModal'
-import EditItemModal from '@/components/inventario/modals/EditItemModal'
+import ItemFormSheet from '@/components/inventario/modals/ItemFormSheet'
 import ItemDetailSheet from '@/components/inventario/modals/ItemDetailSheet'
 import { ITEM_STATUS_LABEL, isAlertStatus } from '@/lib/inventario/labels'
 import type { InventoryItem } from '@/lib/inventario/types'
@@ -40,10 +39,10 @@ function describeStock(item: InventoryItem): { text: string; alert: boolean } | 
 /* ─── Componente ────────────────────────────────────────────────────────── */
 
 export default function ItemsTab() {
-  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  // Sin artículo seleccionado el formulario da de alta; con uno, edita
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
 
@@ -78,7 +77,10 @@ export default function ItemsTab() {
 
   const totalItems = itemsQuery.data?.pages[0]?.meta?.totalItems ?? items.length
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] })
+  const openCreate = () => {
+    setEditingItem(null)
+    setIsFormOpen(true)
+  }
 
   const openDetails = (item: InventoryItem) => {
     setSelectedItem(item)
@@ -93,7 +95,7 @@ export default function ItemsTab() {
           onChange={setSearchTerm}
           placeholder="Buscar por nombre o código"
         />
-        <Button className={cn(TOUCH, 'hidden shrink-0 sm:inline-flex')} onClick={() => setIsCreateOpen(true)}>
+        <Button className={cn(TOUCH, 'hidden shrink-0 sm:inline-flex')} onClick={() => openCreate()}>
           <Plus aria-hidden />
           Nuevo artículo
         </Button>
@@ -112,7 +114,7 @@ export default function ItemsTab() {
               title="Aún no hay artículos"
               description="Agrega lo que rentas o vendes para llevar el control de tus existencias."
               action={
-                <Button className={TOUCH} onClick={() => setIsCreateOpen(true)}>
+                <Button className={TOUCH} onClick={() => openCreate()}>
                   <Plus aria-hidden />
                   Nuevo artículo
                 </Button>
@@ -164,30 +166,15 @@ export default function ItemsTab() {
       </section>
 
       <MobileFab
-        onClick={() => setIsCreateOpen(true)}
+        onClick={() => openCreate()}
         aria-label="Nuevo artículo"
         title="Nuevo artículo"
       />
 
-      <CreateItemModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreated={() => {
-          setIsCreateOpen(false)
-          refresh()
-        }}
-        categories={categoriesQuery.data ?? []}
-        locations={locationsQuery.data ?? []}
-      />
-
-      <EditItemModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        onUpdated={() => {
-          setIsEditOpen(false)
-          refresh()
-        }}
-        item={selectedItem}
+      <ItemFormSheet
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        item={editingItem}
         categories={categoriesQuery.data ?? []}
         locations={locationsQuery.data ?? []}
       />
@@ -198,7 +185,8 @@ export default function ItemsTab() {
         item={selectedItem}
         onEditClick={() => {
           setIsDetailOpen(false)
-          setIsEditOpen(true)
+          setEditingItem(selectedItem)
+          setIsFormOpen(true)
         }}
       />
     </div>

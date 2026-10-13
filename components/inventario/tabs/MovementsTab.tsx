@@ -1,144 +1,224 @@
-'use client';
+// components/inventario/tabs/MovementsTab.tsx
+'use client'
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
-import { ArrowDown, ArrowUp, RefreshCcw, AlertTriangle, Loader2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { inventarioApi } from '@/lib/inventario/api';
-import type { InventoryMovement, InventoryItem, InventoryLocation } from '@/lib/inventario/types';
-import CreateMovementModal from '@/components/inventario/modals/CreateMovementModal';
+import { useMemo, useState } from 'react'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Loader2, Plus } from 'lucide-react'
+import { inventarioApi } from '@/lib/inventario/api'
+import { describeDate, parseDate, toLocalDateInput } from '@/lib/display'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { MobileFab } from '@/components/ui/mobile-fab'
+import { LABEL, TOUCH } from '@/components/ui/detail'
+import { EmptyState, InlineError, ListSkeleton } from '@/components/ui/states'
+import CreateMovementModal from '@/components/inventario/modals/CreateMovementModal'
+import type { InventoryMovement, InventoryMovementType } from '@/lib/inventario/types'
+
+const PAGE_SIZE = 30
+
+const TYPE_LABEL: Record<InventoryMovementType, string> = {
+  in: 'Entrada',
+  out: 'Salida',
+  transfer: 'Traspaso',
+  adjustment: 'Ajuste',
+}
+
+/* ─── Presentación ──────────────────────────────────────────────────────── */
+
+/** Cantidad con signo: solo las entradas se destacan, igual que en Finanzas. */
+function quantityOf(mov: InventoryMovement): { text: string; positive: boolean } {
+  switch (mov.type) {
+    case 'in':
+      return { text: `+${mov.quantity}`, positive: true }
+    case 'out':
+      return { text: `−${mov.quantity}`, positive: false }
+    default:
+      return { text: String(mov.quantity), positive: false }
+  }
+}
+
+/** Segunda línea: tipo y lo que da contexto (de dónde a dónde, o el motivo). */
+function subtitleOf(mov: InventoryMovement): string {
+  const label = TYPE_LABEL[mov.type] ?? 'Movimiento'
+  const reason = mov.reason?.trim() ?? ''
+
+  if (mov.type === 'transfer' && (mov.originLocationName || mov.destinationLocationName)) {
+    return `${label} · ${mov.originLocationName ?? '—'} → ${mov.destinationLocationName ?? '—'}`
+  }
+  if (mov.type === 'adjustment') {
+    const after = mov.snapshotStockAfter?.total
+    return [label, typeof after === 'number' ? `Quedó en ${after}` : reason].filter(Boolean).join(' · ')
+  }
+  return [label, reason].filter(Boolean).join(' · ')
+}
+
+/** Agrupa por día conservando el orden que manda la API. */
+function groupByDay(list: InventoryMovement[]) {
+  const groups: { key: string; label: string; items: InventoryMovement[] }[] = []
+  for (const mov of list) {
+    const date = parseDate(mov.createdAt)
+    const key = date ? toLocalDateInput(date) : 'sin-fecha'
+    let group = groups.find((g) => g.key === key)
+    if (!group) {
+      const info = describeDate(mov.createdAt)
+      const label = info ? (Math.abs(info.days) <= 1 ? info.relative : info.label) : 'Sin fecha'
+      group = { key, label, items: [] }
+      groups.push(group)
+    }
+    group.items.push(mov)
+  }
+  return groups
+}
+
+/* ─── Componente ────────────────────────────────────────────────────────── */
 
 export default function MovementsTab() {
-  const [movements, setMovements] = useState<InventoryMovement[]>([]);
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [locations, setLocations] = useState<InventoryLocation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient()
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
 
-  const fetchMovements = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [movRes, itemsRes, locRes] = await Promise.all([
-        inventarioApi.getMovements({ limit: 50 }),
-        inventarioApi.getItems({ limit: 100 }), // Podría cambiarse a autocompletado en un futuro si son miles
-        inventarioApi.getLocations()
-      ]);
-      setMovements(movRes.items);
-      setItems(itemsRes.items);
-      setLocations(locRes);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar los movimientos.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const listQuery = useInfiniteQuery({
+    queryKey: ['inventory', 'movements'],
+    queryFn: ({ pageParam }) => inventarioApi.getMovements({ page: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.meta?.hasNextPage ? (last.meta.page ?? 1) + 1 : undefined),
+  })
 
-  useEffect(() => {
-    fetchMovements();
-  }, [fetchMovements]);
+  // Solo el formulario las necesita: se piden al abrirlo
+  const itemsQuery = useQuery({
+    queryKey: ['inventory', 'items', 'for-movements'],
+    queryFn: () => inventarioApi.getItems({ limit: 100 }),
+    enabled: isCreateOpen,
+  })
+  const locationsQuery = useQuery({
+    queryKey: ['inventory', 'locations'],
+    queryFn: () => inventarioApi.getLocations(),
+    enabled: isCreateOpen,
+  })
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'in': return <ArrowDown className="w-4 h-4 text-emerald-600" />;
-      case 'out': return <ArrowUp className="w-4 h-4 text-blue-600" />;
-      case 'transfer': return <RefreshCcw className="w-4 h-4 text-violet-600" />;
-      case 'adjustment': return <AlertTriangle className="w-4 h-4 text-amber-600" />;
-      default: return null;
-    }
-  };
+  const movements = useMemo(() => {
+    const seen = new Set<string>()
+    return (listQuery.data?.pages ?? [])
+      .flatMap((page) => page.items ?? [])
+      .filter((mov) => !seen.has(mov.id) && seen.add(mov.id))
+  }, [listQuery.data])
 
-  const getBadge = (type: string) => {
-    switch (type) {
-      case 'in': return <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs">Entrada</span>;
-      case 'out': return <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Salida</span>;
-      case 'transfer': return <span className="bg-violet-100 text-violet-700 px-2 py-0.5 rounded text-xs">Traspaso</span>;
-      case 'adjustment': return <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs">Ajuste</span>;
-      default: return null;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16 bg-white rounded-2xl border border-violet-100">
-        <Loader2 className="w-6 h-6 animate-spin text-violet-500 mr-2" />
-        <span className="text-violet-500 text-sm">Cargando movimientos...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="py-10 text-center bg-white rounded-2xl border border-red-100 text-red-500 text-sm">{error}</div>;
-  }
+  const groups = useMemo(() => groupByDay(movements), [movements])
+  const loadedPages = listQuery.data?.pages.length ?? 0
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center bg-white p-3 rounded-2xl border border-violet-100 shadow-sm">
-        <h3 className="font-semibold text-violet-950 px-2">Historial de Movimientos</h3>
-        <Button 
-          className="h-9 rounded-xl bg-violet-600 hover:bg-violet-700 text-white"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus className="w-4 h-4 sm:mr-2" />
-          <span className="hidden sm:inline">Nuevo Movimiento</span>
+    <div className="space-y-6">
+      <div className="hidden justify-end sm:flex">
+        <Button className={TOUCH} onClick={() => setIsCreateOpen(true)}>
+          <Plus aria-hidden />
+          Nuevo movimiento
         </Button>
       </div>
 
-      {movements.length === 0 ? (
-        <div className="py-16 text-center bg-white rounded-2xl border border-violet-100">
-          <RefreshCcw className="w-12 h-12 mx-auto mb-3 text-violet-200" />
-          <p className="font-semibold text-violet-700 mb-1">Sin movimientos registrados</p>
-          <p className="text-sm text-violet-400">Los movimientos de inventario aparecerán aquí.</p>
-        </div>
-      ) : (
-        <Card className="bg-white rounded-2xl border-violet-100 shadow-sm overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-violet-50/50 text-violet-700 font-semibold border-b border-violet-100">
-          <tr>
-            <th className="px-4 py-3">Fecha</th>
-            <th className="px-4 py-3">Tipo</th>
-            <th className="px-4 py-3">Artículo</th>
-            <th className="px-4 py-3">Cant.</th>
-            <th className="px-4 py-3 hidden md:table-cell">Origen → Destino</th>
-            <th className="px-4 py-3 hidden lg:table-cell">Motivo</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-violet-50">
-          {movements.map(mov => (
-            <tr key={mov.id} className="hover:bg-violet-50/30 transition-colors">
-              <td className="px-4 py-3 text-xs text-violet-500 whitespace-nowrap">
-                {new Date(mov.createdAt).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  {getIcon(mov.type)}
-                  {getBadge(mov.type)}
-                </div>
-              </td>
-              <td className="px-4 py-3 font-medium text-violet-950">{mov.itemName}</td>
-              <td className="px-4 py-3 font-bold text-violet-900">{mov.quantity}</td>
-              <td className="px-4 py-3 text-violet-600 text-xs hidden md:table-cell">
-                {mov.originLocationName ?? '—'} → {mov.destinationLocationName ?? '—'}
-              </td>
-              <td className="px-4 py-3 text-violet-500 text-xs hidden lg:table-cell">{mov.reason}</td>
-            </tr>
-          ))}
-          </tbody>
-        </table>
-      </Card>
-      )}
+      <section aria-label="Historial de movimientos">
+        {listQuery.isLoading ? (
+          <ListSkeleton rows={5} label="Cargando movimientos" />
+        ) : listQuery.isError && movements.length === 0 ? (
+          <InlineError message="No se pudieron cargar tus movimientos." onRetry={() => listQuery.refetch()} />
+        ) : movements.length === 0 ? (
+          <EmptyState
+            title="Aún no hay movimientos"
+            description="Aquí verás cada entrada, salida o traspaso de tus artículos."
+            action={
+              <Button className={TOUCH} onClick={() => setIsCreateOpen(true)}>
+                <Plus aria-hidden />
+                Nuevo movimiento
+              </Button>
+            }
+          />
+        ) : (
+          <div className="space-y-6">
+            {groups.map((group) => (
+              <div key={group.key} className="space-y-2">
+                <h3 className={LABEL}>{group.label}</h3>
+                <Card className="gap-0 overflow-hidden py-0">
+                  <ul className="divide-y">
+                    {group.items.map((mov) => (
+                      <MovementRow key={mov.id} mov={mov} />
+                    ))}
+                  </ul>
+                </Card>
+              </div>
+            ))}
+
+            <p className="sr-only" aria-live="polite">
+              {movements.length} movimientos mostrados
+            </p>
+
+            {listQuery.hasNextPage ? (
+              <div className="space-y-2">
+                {listQuery.isFetchNextPageError && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    No se pudieron cargar más. Revisa tu conexión.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  className={cn(TOUCH, 'w-full')}
+                  onClick={() => listQuery.fetchNextPage()}
+                  disabled={listQuery.isFetchingNextPage}
+                >
+                  {listQuery.isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="animate-spin" aria-hidden />
+                      Cargando…
+                    </>
+                  ) : listQuery.isFetchNextPageError ? (
+                    'Reintentar'
+                  ) : (
+                    'Ver más movimientos'
+                  )}
+                </Button>
+              </div>
+            ) : (
+              loadedPages > 1 && (
+                <p className="py-2 text-center text-sm text-muted-foreground">Ya viste todos tus movimientos</p>
+              )
+            )}
+          </div>
+        )}
+      </section>
+
+      <MobileFab
+        onClick={() => setIsCreateOpen(true)}
+        aria-label="Nuevo movimiento"
+        title="Nuevo movimiento"
+      />
 
       <CreateMovementModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
         onCreated={() => {
-          setIsCreateModalOpen(false);
-          fetchMovements();
+          setIsCreateOpen(false)
+          // El movimiento cambia las existencias: la lista de artículos también se refresca
+          queryClient.invalidateQueries({ queryKey: ['inventory', 'movements'] })
+          queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] })
         }}
-        items={items}
-        locations={locations}
+        items={itemsQuery.data?.items ?? []}
+        locations={locationsQuery.data ?? []}
       />
     </div>
-  );
+  )
+}
+
+/* ─── Subcomponentes ────────────────────────────────────────────────────── */
+
+function MovementRow({ mov }: { mov: InventoryMovement }) {
+  const quantity = quantityOf(mov)
+  return (
+    <li className="flex min-h-16 items-center gap-3 px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-base font-medium">{mov.itemName}</p>
+        <p className="truncate text-[15px] text-muted-foreground">{subtitleOf(mov)}</p>
+      </div>
+      <p className={cn('shrink-0 text-base font-semibold tabular-nums', quantity.positive && 'text-success')}>
+        {quantity.text}
+      </p>
+    </li>
+  )
 }
