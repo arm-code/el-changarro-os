@@ -55,7 +55,7 @@ export function buildMapsUrl(address: string): string {
 
 // ─── Modelo de vista ─────────────────────────────────────────────────────────
 type PublicBusiness = NonNullable<
-    Awaited<ReturnType<typeof businessApi.getPublicBusinessBySlug>>
+    Awaited<ReturnType<typeof businessApi.getPublicBusiness>>
 >;
 
 export function toLandingModel(business: PublicBusiness) {

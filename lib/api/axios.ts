@@ -1,21 +1,5 @@
 import axios from 'axios';
 
-export const ACTIVE_BUSINESS_KEY = 'active_business_id';
-
-export function getActiveBusinessId(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(ACTIVE_BUSINESS_KEY);
-}
-
-export function setActiveBusinessIdInStorage(id: string | null) {
-  if (typeof window === 'undefined') return;
-  if (id) {
-    localStorage.setItem(ACTIVE_BUSINESS_KEY, id);
-  } else {
-    localStorage.removeItem(ACTIVE_BUSINESS_KEY);
-  }
-}
-
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   headers: {
@@ -24,19 +8,6 @@ export const axiosInstance = axios.create({
   // La sesión es una cookie httpOnly que pone el API
   withCredentials: true,
 });
-
-// Interceptor para agregar X-Business-ID
-axiosInstance.interceptors.request.use(
-  async (config) => {
-    const activeBusinessId = getActiveBusinessId();
-    if (activeBusinessId) {
-      config.headers['X-Business-ID'] = activeBusinessId;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // Interceptor para desempaquetar la respuesta de la API de ARM Solutions
 axiosInstance.interceptors.response.use(

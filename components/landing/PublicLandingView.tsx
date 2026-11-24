@@ -19,8 +19,8 @@ function StateLayout({ children }: { children: ReactNode }) {
     );
 }
 
-export function PublicLandingView({ negocio }: { negocio: string }) {
-    const { data, isPending, isError, error } = useQuery(publicBusinessQuery(negocio));
+export function PublicLandingView() {
+    const { data, isPending, isError, error } = useQuery(publicBusinessQuery());
 
     if (isPending) return <LandingSkeleton />;
 
@@ -60,8 +60,8 @@ export function PublicLandingView({ negocio }: { negocio: string }) {
                     <Testimonials model={model} />
                     <About model={model} />
                     <Faq model={model} />
-                    <Payments model={model} slug={negocio} />
-                    <Contact model={model} slug={negocio} />
+                    <Payments model={model} />
+                    <Contact model={model} />
                 </div>
             </main>
             <Footer model={model} />

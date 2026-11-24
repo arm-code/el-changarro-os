@@ -1,5 +1,3 @@
-import { getActiveBusinessId } from './axios';
-
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -12,11 +10,8 @@ export async function apiClient<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const isFormData = options.body instanceof FormData;
-    const activeBusinessId = getActiveBusinessId();
-
     const headers: Record<string, string> = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(activeBusinessId ? { 'X-Business-ID': activeBusinessId } : {}),
       ...((options.headers as Record<string, string>) || {}),
     };
 

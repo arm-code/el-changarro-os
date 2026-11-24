@@ -107,14 +107,14 @@ function CopyField({
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
-   COMPONENTE: PaymentInfoPage (Multi-Tenant)
+   COMPONENTE: PaymentInfoPage 
    Usa useTenant() — sin token, 0 errores 401.
    ─────────────────────────────────────────────────────────────────────────── */
 export default function PaymentInfoPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Datos del negocio vienen del TenantProvider (API pública, sin auth)
-  const { isLoading, businessName, whatsapp, paymentCards, negocio, publicBusiness } = useTenant();
+  const { isLoading, businessName, whatsapp, paymentCards, publicBusiness } = useTenant();
   const model = publicBusiness ? toLandingModel(publicBusiness) : null;
   const palette = model?.palette || 'elegant';
 

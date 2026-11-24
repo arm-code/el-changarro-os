@@ -6,7 +6,7 @@
 - Ejecutar `pnpm install`.
 - Crear un archivo en la raiz del proyecto `.env.local` basandote de `.env.template`.
 - Colocar las credenciales de acceso solicitadas dentro del archivo.
-- **IMPORTANTE:** La variable de entorno `NEXT_PUBLIC_DEFAULT_BUSINESS_SLUG` debe estar configurada obligatoriamente, ya que sin ella la aplicación no podrá establecer el slug del negocio por defecto en ambientes locales o que no dispongan de un subdominio válido.
+- Cada instancia atiende a un solo negocio: el API decide cuál con su variable `BUSINESS_SLUG`. El front no necesita saber su slug.
 - Ejecutar en local con `pnpm run dev`.
 ---
 

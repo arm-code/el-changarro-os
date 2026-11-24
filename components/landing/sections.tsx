@@ -445,7 +445,7 @@ export function Faq({ model }: Props) {
 }
 
 // ─── Datos de pago ───────────────────────────────────────────────────────────
-export function Payments({ model, slug }: Props & { slug: string }) {
+export function Payments({ model }: Props) {
     if (model.paymentCards.length === 0) return null;
     return (
         <Section
@@ -490,7 +490,7 @@ export function Payments({ model, slug }: Props & { slug: string }) {
                 ))}
             </div>
             <ShareButton
-                path={`/${slug}#pagos`}
+                path="/#pagos"
                 title={`Datos de pago · ${model.name}`}
                 label="Compartir datos de pago"
                 className="mt-4"
@@ -504,7 +504,7 @@ export function hasContactSection(model: LandingModel) {
     return Boolean(model.hasContact || model.address || model.openingHours || model.coverageAreas.length);
 }
 
-export function Contact({ model, slug }: Props & { slug: string }) {
+export function Contact({ model }: Props) {
     if (!hasContactSection(model)) return null;
 
     const rows = [
@@ -565,7 +565,7 @@ export function Contact({ model, slug }: Props & { slug: string }) {
             </div>
 
             <ShareButton
-                path={`/${slug}`}
+                path="/"
                 title={model.name}
                 label="Compartir esta página"
                 className="mt-6"

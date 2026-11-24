@@ -8,7 +8,6 @@ import { defaultBusinessConfig } from '@/lib/config';
 import type { PublicBusinessResponse } from '@/types/finance';
 
 interface TenantContextValue {
-  negocio: string;
   publicBusiness: PublicBusinessResponse | undefined;
   isLoading: boolean;
 }
@@ -16,21 +15,14 @@ interface TenantContextValue {
 const TenantContext = createContext<TenantContextValue | null>(null);
 
 /**
- * TenantProvider — envuelve las rutas de un negocio específico.
- * Lee el slug de la URL (params.negocio) y obtiene la configuración pública
- * del backend sin necesidad de autenticación.
+ * TenantProvider — carga la información pública del negocio de esta instancia
+ * (una instancia = un negocio) sin necesidad de autenticación.
  */
-export function TenantProvider({
-  children,
-  negocio,
-}: {
-  children: ReactNode;
-  negocio: string;
-}) {
-  const { data: publicBusiness, isLoading } = useQuery(publicBusinessQuery(negocio));
+export function TenantProvider({ children }: { children: ReactNode }) {
+  const { data: publicBusiness, isLoading } = useQuery(publicBusinessQuery());
 
   return (
-    <TenantContext.Provider value={{ negocio, publicBusiness, isLoading }}>
+    <TenantContext.Provider value={{ publicBusiness, isLoading }}>
       {children}
     </TenantContext.Provider>
   );
@@ -47,7 +39,7 @@ export function useTenant() {
     throw new Error('useTenant debe usarse dentro de un <TenantProvider>');
   }
 
-  const { negocio, publicBusiness, isLoading } = ctx;
+  const { publicBusiness, isLoading } = ctx;
 
   const config = publicBusiness?.config ?? defaultBusinessConfig;
   const businessName = publicBusiness?.name || config.name || '';
@@ -71,7 +63,6 @@ export function useTenant() {
   const faqs = config.faqs ?? [];
 
   return {
-    negocio,
     publicBusiness,
     isLoading,
     config,

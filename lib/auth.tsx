@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react'
-import { axiosInstance, setActiveBusinessIdInStorage } from '@/lib/api/axios'
+import { axiosInstance } from '@/lib/api/axios'
 
 export interface AuthUser {
   id: string
@@ -62,7 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await axiosInstance.post('/v1/auth/logout')
     } finally {
-      setActiveBusinessIdInStorage(null)
       setUser(null)
       window.location.href = redirectTo
     }

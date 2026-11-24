@@ -38,14 +38,13 @@ export const businessApi = {
     return res.data;
   },
 
-  getBusinessById: async (id: string): Promise<Business> => {
-    const res = await axiosInstance.get<Business>(`${PREFIX}/${id}`);
-    return res.data;
-  },
-
-  getPublicBusinessBySlug: async (slug: string): Promise<PublicBusinessResponse> => {
+  /**
+   * Información pública (landing) del negocio de esta instancia. Sin autenticación.
+   * Backend: GET /v1/businesses/public
+   */
+  getPublicBusiness: async (): Promise<PublicBusinessResponse> => {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/v1/businesses/public/${slug}`, {
+    const res = await fetch(`${baseUrl}/v1/businesses/public`, {
       next: { revalidate: 600 }
     });
     if (!res.ok) {
@@ -54,26 +53,6 @@ export const businessApi = {
       }
       throw new Error(`Error API: ${res.status}`);
     }
-    const json = await res.json();
-    return json;
-  },
-
-  /**
-   * Lista todos los negocios activos — endpoint público, sin autenticación.
-   * Backend: GET /v1/businesses/public
-   */
-  getPublicBusinesses: async (): Promise<PublicBusinessResponse[]> => {
-    const res = await axiosInstance.get<PublicBusinessResponse[]>(`${PREFIX}/public`);
-    return res.data;
-  },
-
-  createBusiness: async (data: CreateBusinessDto): Promise<Business> => {
-    const res = await axiosInstance.post<Business>(PREFIX, data);
-    return res.data;
-  },
-
-  updateBusiness: async (id: string, data: UpdateBusinessDto): Promise<Business> => {
-    const res = await axiosInstance.patch<Business>(`${PREFIX}/${id}`, data);
-    return res.data;
+    return await res.json();
   },
 };

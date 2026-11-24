@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { Business, businessApi } from '@/lib/api/business';
-import { setActiveBusinessIdInStorage } from '@/lib/api/axios';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
 
@@ -33,7 +32,6 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     if (!user) {
       setBusiness(null);
       setActiveBusinessIdState(null);
-      setActiveBusinessIdInStorage(null);
       setHasNoBusiness(false);
       setLoading(false);
       return;
@@ -49,12 +47,10 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
         const singleBusiness = list[0];
         setBusiness(singleBusiness);
         setActiveBusinessIdState(singleBusiness.id);
-        setActiveBusinessIdInStorage(singleBusiness.id);
         setHasNoBusiness(false);
       } else {
         setBusiness(null);
         setActiveBusinessIdState(null);
-        setActiveBusinessIdInStorage(null);
         setHasNoBusiness(true);
         toast.error('Atención: Usuario sin negocio', {
           description: 'Tu usuario no tiene un negocio asignado. Por favor contacta a soporte técnico.',
