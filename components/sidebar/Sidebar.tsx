@@ -6,7 +6,7 @@ import SidebarHeader from './SidebarHeader';
 import SidebarNav from './SidebarNav';
 import SidebarFooter from './SidebarFooter';
 import Topbar from './Topbar';
-import { supabaseBrowser } from '@/lib/supabase/supabaseBrowser';
+import { useAuth } from '@/lib/auth';
 import { View } from '@/types/View.types';
 import { Home, Package, PackagePlus, Settings, Tags, Menu, X, Boxes, Wrench, PackageSearch, DollarSign, FileText, LayoutDashboard } from 'lucide-react';
 import { MenuItem } from './SidebarNav';
@@ -26,8 +26,9 @@ export default function SidebarLayout({
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Abierto por defecto en desktop
   const [isMobile, setIsMobile] = useState(false);
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, signOut } = useAuth();
+  // SidebarFooter y Topbar esperan { user: { email } } (forma heredada)
+  const session = user ? { user } : null;
   const router = useRouter();
 
   // Detectar si es móvil
@@ -44,25 +45,8 @@ export default function SidebarLayout({
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
 
-  useEffect(() => {
-    supabaseBrowser.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabaseBrowser.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
-    await supabaseBrowser.auth.signOut();
-    setSession(null);
-    router.push('/auth/login');
+    await signOut('/auth/login');
   };
 
   const menuItems: MenuItem[] = [

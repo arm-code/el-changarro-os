@@ -26,6 +26,7 @@ export async function apiClient<T>(
         ...options,
         headers,
         cache: 'no-store',
+        credentials: 'include',
       }
     );
 

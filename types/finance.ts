@@ -161,7 +161,7 @@ export interface PaymentCard {
 
 export interface GalleryItem {
   id: string;
-  url: string;          // URL pública de Supabase Storage (CDN)
+  url: string;          // URL pública del archivo (el API los sirve en /files)
   label: string | null; // Etiqueta legible, p.ej: "Mesas y sillas"
   alt: string | null;   // Texto alternativo accesible
   order: number;        // Ya viene ordenado ASC desde el backend

@@ -1,15 +1,13 @@
+import { axiosInstance } from '@/lib/api/axios'
 
-
-import { createClient } from "@/utils/supabase/component"
-
+/**
+ * Inicia sesión contra el API. El API responde con una cookie httpOnly de
+ * sesión; aquí solo recibimos los datos básicos del usuario.
+ */
 export async function loginUser(email: string, password: string) {
-
-  const supabase = createClient()
-  
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const res = await axiosInstance.post<{ id: string; email: string }>('/v1/auth/login', {
     email,
     password,
   })
-  if (error) throw error
-  return data.user
+  return res.data
 }

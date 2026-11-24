@@ -1,29 +1,29 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { jwtVerify } from 'jose';
+
+/** Debe coincidir con SESSION_COOKIE_NAME del API. */
+const SESSION_COOKIE = 'cb_session';
+
+/**
+ * Verifica la firma y vigencia del JWT de sesión (mismo JWT_SECRET que el API).
+ * Es solo la puerta de las páginas; el API vuelve a validar cada petición.
+ */
+async function hasValidSession(req: NextRequest): Promise<boolean> {
+  const token = req.cookies.get(SESSION_COOKIE)?.value;
+  const secret = process.env.JWT_SECRET;
+  if (!token || !secret) return false;
+  try {
+    await jwtVerify(token, new TextEncoder().encode(secret), { algorithms: ['HS256'] });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function proxy(req: NextRequest) {
-  const res = NextResponse.next();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
   const url = req.nextUrl.clone();
+  const loggedIn = await hasValidSession(req);
 
   // Rutas privadas del admin (requieren sesión)
   const privateRoutes = [
@@ -38,17 +38,17 @@ export async function proxy(req: NextRequest) {
     (route) => url.pathname === route || url.pathname.startsWith(`${route}/`)
   );
 
-  if (!session && isPrivate) {
+  if (!loggedIn && isPrivate) {
     url.pathname = '/auth/login';
     return NextResponse.redirect(url);
   }
 
-  if (session && url.pathname.startsWith('/auth')) {
+  if (loggedIn && url.pathname.startsWith('/auth')) {
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {

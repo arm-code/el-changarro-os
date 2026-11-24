@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { supabaseBrowser } from '../supabase/supabaseBrowser';
 
 export const ACTIVE_BUSINESS_KEY = 'active_business_id';
 
@@ -22,16 +21,13 @@ export const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // La sesión es una cookie httpOnly que pone el API
+  withCredentials: true,
 });
 
-// Interceptor para agregar token de Supabase y X-Business-ID
+// Interceptor para agregar X-Business-ID
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const { data: { session } } = await supabaseBrowser.auth.getSession();
-    if (session?.access_token) {
-      config.headers.Authorization = `Bearer ${session.access_token}`;
-    }
-
     const activeBusinessId = getActiveBusinessId();
     if (activeBusinessId) {
       config.headers['X-Business-ID'] = activeBusinessId;
